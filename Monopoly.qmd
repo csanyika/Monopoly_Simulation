@@ -7,9 +7,10 @@ editor: visual
 ## Define the board
 
 ```{r}
-#tile names
-board <- c(
-  "Go", "Mediterranean Avenue", "Community Chest", "Baltic Avenue", "Income Tax",
+
+initialize_game <- function(n_players) {
+  #tile names
+  board <- c("Go", "Mediterranean Avenue", "Community Chest", "Baltic Avenue", "Income Tax",
   "Reading Railroad", "Oriental Avenue", "Chance", "Vermont Avenue", "Connecticut Avenue",
   "Jail", "St. Charles Place", "Electric Company", "States Avenue", "Virginia Avenue", "Pennsylvania Railroad",
   "St. James Place", "Community Chest",  "Tennessee Avenue", "New York Avenue", "Free Parking",
@@ -28,7 +29,7 @@ property_values <- c(
   220, NA, 220, 240, 200,
   260, 260, 150, 280, NA,
   300, 300, NA, 320, 200,
-  350, NA, 100, 400
+  NA, 350, 100, 400
 )
 
 #combine in dataframe
@@ -38,28 +39,33 @@ monopoly_board <- data.frame(
   PropertyValue = property_values,
   Owner = NA
 )
-monopoly_board
 
-jail
 taxed_spaces <- c("Luxury Tax", "Income Tax")
 special_tiles <- c("Chance", "Community Chest")
+players <- data.frame(
+    ID = 1:n_players,
+    #start at "Go" (position 1)
+    Position = rep(1, n_players),
+    #start with $1,500 per player
+    Cash = rep(1500, n_players)
+  )
+  
+  return(list(monopoly_board = monopoly_board, players = players))
+}
 ```
 
 ## Simulating a Game
 
 ```{r}
-n_players <- 2
-rounds <- 10
-
-players <- data.frame(
-  #allocate a ID number to each player
-  ID = 1:n_players,
-  Position = rep(1, n_players),
-  #amount of money each player has
-  Cash = rep(1500, n_players)
-)
-
-for (round in 1:rounds) {
+game <- function(n_players) {
+  game_data <- initialize_game(n_players)
+  monopoly_board <- game_data$monopoly_board
+  players <- game_data$players
+  
+  rounds <- 0
+  while (nrow(monopoly_board[!is.na(monopoly_board$Owner), ]) < 28) {
+    rounds <- rounds + 1
+    #cat(sprintf("\n-- Round %d --\n", rounds))
   for (player in 1:n_players){
     dice_roll <- sum(sample(1:6, 2, replace = TRUE))
     position_update <- players$Position[player] + dice_roll
@@ -73,25 +79,26 @@ for (round in 1:rounds) {
     landed_property <- monopoly_board$Name[position_update]
     
     if (landed_property == "Go to Jail") {
-      jail_pos <- which(monopoly_board$Name == "Jail")
-      players$Position[player] <- jail_position
+      jail_space <- which(monopoly_board$Name == "Jail")
+      players$Position[player] <- jail_space
     } else if (landed_property %in% taxed_spaces) {
       # Handle special space payments
       if (landed_property == "Luxury Tax") {
         players$Cash[player] <- players$Cash[player] - 100
-        cat(sprintf("Player %d landed on Luxury Tax and paid $100\n", player))
+        #cat(sprintf("Player %d landed on Luxury Tax and paid $100\n", player))
       } else if (landed_property == "Income Tax") {
         players$Cash[player] <- players$Cash[player] - 200
-        cat(sprintf("Player %d landed on Income Tax and paid $200\n", player))
+        #cat(sprintf("Player %d landed on Income Tax and paid $200\n", player))
       } else if (landed_property == "Electric Company") {
         players$Cash[player] <- players$Cash[player] - 150
-        cat(sprintf("Player %d landed on Electric Company and paid $150\n", player))
+        #cat(sprintf("Player %d landed on Electric Company and paid $150\n", player))
       }
-    } else {#check property on the new position
+    } else {
+      #check property on the new position
       prop_index <- position_update
     if (prop_index > nrow(monopoly_board) || prop_index < 1) {
-      cat(sprintf("Invalid property index: %d\n", prop_index))
-      next  # Skip invalid indices
+      #cat(sprintf("Invalid property index: %d\n", prop_index))
+      next
     }
     
     prop_value <- monopoly_board$PropertyValue[prop_index]
@@ -102,82 +109,87 @@ for (round in 1:rounds) {
       if (is.na(prop_owner)) {
         if (players$Cash[player] >= prop_value) {
           players$Cash[player] <- players$Cash[player] - prop_value
-          monopoly_board$Owner[prop_index] <- player
-          cat(sprintf("Player %d bought %s for $%d\n", player, monopoly_board$Name[prop_index], prop_value))
-        } else {
-          cat(sprintf("Player %d can't afford %s (Cost: $%d, Cash: $%d)\n", player, monopoly_board$Name[prop_index], prop_value, players$Cash[player]))
+          monopoly_board$Owner[prop_index] <- player}
+          #cat(sprintf("Player %d bought %s for $%d\n", player, monopoly_board$Name[prop_index], prop_value))
         }
-      } else {
-        cat(sprintf("Player %d landed on %s, owned by Player %d\n", player, monopoly_board$Name[prop_index], prop_owner))
-      }
     }
   }
-}}
-
-print(monopoly_board[!is.na(monopoly_board$Owner), ])
-```
-
-```{r}
-for (round in 1:rounds) {
-  for (player in 1:n_players) {
-    # Roll two dice
-    dice_roll <- sum(sample(1:6, 2, replace = TRUE))
-    position_update <- players$Position[player] + dice_roll
-    
-    # If player passes Go, they get $200
-    if (position_update > nrow(monopoly_board)) {
-      position_update <- position_update %% nrow(monopoly_board)
-      players$Cash[player] <- players$Cash[player] + 200
-    }
-    # Ensure position_update is never zero
-    if (position_update == 0) {
-      position_update <- nrow(monopoly_board)
-    }
-    players$Position[player] <- position_update
-    
-    # Check the property at the updated position
-    prop_index <- position_update
-    if (prop_index > 0 && prop_index <= nrow(monopoly_board)) {
-      prop_value <- monopoly_board$PropertyValue[prop_index]
-      prop_owner <- monopoly_board$Owner[prop_index]
-      
-      # If the property has a value and no owner, attempt purchase
-      if (!is.na(prop_value)) {
-        if (is.na(prop_owner)) {
-          if (players$Cash[player] >= prop_value) {  # Player can afford
-            players$Cash[player] <- players$Cash[player] - prop_value
-            monopoly_board$Owner[prop_index] <- player
-            cat(sprintf("Player %d bought %s for $%d\n", 
-                        player, monopoly_board$Name[prop_index], prop_value))
-          } else {  # Player cannot afford the property
-            cat(sprintf("Player %d can't afford %s (Cost: $%d, Cash: $%d)\n", 
-                        player, monopoly_board$Name[prop_index], prop_value, players$Cash[player]))
-          }
-        } else {  # Property is owned
-          cat(sprintf("Player %d landed on %s, owned by Player %d\n", 
-                      player, monopoly_board$Name[prop_index], prop_owner))
-        }
-      }
-    } else {
-      cat(sprintf("Invalid property index: %d\n", prop_index))
-    }
-  }
+  }}
+  return(rounds)
+  #cat("\nAll properties have been purchased.\n")
+  #cat(sprintf("Total number of rounds: %d\n", rounds))
+  #cat("\nPlayers' Cash:\n")
+  #print(players)
+  #cat("\nMonopoly Board with Ownership:\n")
+  #print(monopoly_board)
 }
 ```
 
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+## Mean number of rounds for all properties to be purchased with 2 players
 
 ```{r}
-1 + 1
-```
+nsim <- 10000
+rounds_list <- numeric(nsim)
+for (i in 1:nsim) {
+  rounds_list[i] <- game(n_players = 2)}
 
-You can add options to executable code like this
+mean_rounds_result <- mean(rounds_list)
+cat(sprintf("\nMean number of rounds across %d simulations: %.2f\n", nsim, mean_rounds_result))
+```
 
 ```{r}
-#| echo: false
-2 * 2
+hist(rounds_list, 
+     main = "Number of Rounds Across Simulations",
+     xlab = "Number of Rounds", 
+     ylab = "Frequency",
+     col = "lightblue", 
+     border = "black")
+
+boxplot(rounds_list, 
+        main = "Boxplot of Number of Rounds Across Simulations",
+        ylab = "Number of Rounds",
+        col = "lightblue", 
+        border = "black")
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+## Mean number of rounds for all properties to be purchased with varying number of players
+
+```{r}
+mean_rounds <- function(min_players, max_players, nsim) {
+  ave_rounds <- numeric(max_players - min_players + 1)
+  for (p in min_players:max_players) {
+    rounds_list <- numeric(nsim)
+    for (i in 1:nsim) {
+      rounds_list[i] <- game(n_players = p)
+    }
+    ave_rounds[p - min_players + 1] <- mean(rounds_list)
+  }
+  return(ave_rounds)
+}
+
+nsim <- 1000
+min_players <- 2
+max_players <- 10
+  
+mean_rounds_result <- mean_rounds(min_players, max_players, nsim)
+
+plot(min_players:max_players, 
+     mean_rounds_result, 
+     #type = "b", 
+     col = "blue", 
+     pch = 19,
+     xlab = "Number of Players", 
+     ylab = "Mean Number of Rounds", 
+     main = "Mean Rounds vs Number of Players")
+```
+
+\*Run simulations in parallel for quicker processing
+
+\*How much money players will have at the end (once all properties are purchased)
+
+\*How many properties each player has
+
+\*Incorporate property taxes
+
+\*Define winning (most properties? most money? most full color combos)
