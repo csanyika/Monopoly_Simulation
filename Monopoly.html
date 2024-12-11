@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Monopoly</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Monopoly_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Monopoly_files/libs/quarto-html/quarto.js"></script>
+<script src="Monopoly_files/libs/quarto-html/popper.min.js"></script>
+<script src="Monopoly_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Monopoly_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Monopoly_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Monopoly_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Monopoly_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Monopoly_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Monopoly_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Monopoly</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="define-the-board" class="level2">
+<h2 class="anchored" data-anchor-id="define-the-board">Define the board</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>initialize_game <span class="ot">&lt;-</span> <span class="cf">function</span>(n_players) {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  board <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Go"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">1</span>, <span class="at">value =</span> <span class="cn">NA</span>, <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="cn">NA</span>),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Mediterranean Avenue"</span><span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">2</span>, <span class="at">value =</span> <span class="dv">60</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">2</span>, <span class="at">color =</span> <span class="st">"brown"</span>),</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Community Chest"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">3</span>, <span class="at">value =</span> <span class="cn">NA</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="cn">NA</span>),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Baltic Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">4</span>, <span class="at">value =</span> <span class="dv">60</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">4</span>, <span class="at">color =</span> <span class="st">"brown"</span>),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Income Tax"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">5</span>, <span class="at">value =</span> <span class="dv">200</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="cn">NA</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Reading Railroad"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">6</span>, <span class="at">value =</span> <span class="dv">200</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">25</span>, <span class="at">color =</span> <span class="st">"railroad"</span>),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Oriental Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">7</span>, <span class="at">value =</span> <span class="dv">100</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">6</span>, <span class="at">color =</span> <span class="st">"light blue"</span>),</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Chance"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">8</span>, <span class="at">value =</span> <span class="cn">NA</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="cn">NA</span>),</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Vermont Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">9</span>, <span class="at">value =</span> <span class="dv">100</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">6</span>, <span class="at">color =</span> <span class="st">"light blue"</span>),</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Connecticut Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">10</span>, <span class="at">value =</span> <span class="dv">120</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">8</span>, <span class="at">color =</span> <span class="st">"light blue"</span>),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Jail"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">11</span>, <span class="at">value =</span> <span class="cn">NA</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="cn">NA</span>),</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>      <span class="st">"St. Charles Place"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">12</span>, <span class="at">value =</span> <span class="dv">140</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">10</span>, <span class="at">color =</span> <span class="st">"pink"</span>),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Electric Company"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">13</span>, <span class="at">value =</span> <span class="dv">150</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="st">"utility"</span>),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>      <span class="st">"States Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">14</span>, <span class="at">value =</span> <span class="dv">140</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">10</span>, <span class="at">color =</span> <span class="st">"pink"</span>),</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Virginia Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">15</span>, <span class="at">value =</span> <span class="dv">160</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">12</span>, <span class="at">color =</span> <span class="st">"pink"</span>),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Pennsylvania Railroad"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">16</span>, <span class="at">value =</span> <span class="dv">200</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">25</span>, <span class="at">color =</span> <span class="st">"railroad"</span>),</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>      <span class="st">"St. James Place"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">17</span>, <span class="at">value =</span> <span class="dv">180</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">14</span>, <span class="at">color =</span> <span class="st">"orange"</span>),</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Community Chest"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">18</span>, <span class="at">value =</span> <span class="cn">NA</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="cn">NA</span>),</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Tennessee Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">19</span>, <span class="at">value =</span> <span class="dv">180</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">14</span>, <span class="at">color =</span> <span class="st">"orange"</span>),</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>      <span class="st">"New York Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">20</span>, <span class="at">value =</span> <span class="dv">200</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">16</span>, <span class="at">color =</span> <span class="st">"orange"</span>),</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Free Parking"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">21</span>, <span class="at">value =</span> <span class="cn">NA</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="cn">NA</span>),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Kentucky Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">22</span>, <span class="at">value =</span> <span class="dv">220</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">18</span>, <span class="at">color =</span> <span class="st">"red"</span>),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Chance"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">23</span>, <span class="at">value =</span> <span class="cn">NA</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="cn">NA</span>),</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Indiana Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">24</span>, <span class="at">value =</span> <span class="dv">220</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">18</span>, <span class="at">color =</span> <span class="st">"red"</span>),</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Illinois Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">25</span>, <span class="at">value =</span> <span class="dv">240</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">20</span>, <span class="at">color =</span> <span class="st">"red"</span>),</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>      <span class="st">"B&amp;O Railroad"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">26</span>, <span class="at">value =</span> <span class="dv">200</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">25</span>, <span class="at">color =</span> <span class="st">"railroad"</span>),</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Atlantic Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">27</span>, <span class="at">value =</span> <span class="dv">260</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">22</span>, <span class="at">color =</span> <span class="st">"yellow"</span>),</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Ventnor Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">28</span>, <span class="at">value =</span> <span class="dv">260</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">22</span>, <span class="at">color =</span> <span class="st">"yellow"</span>),</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Water Works"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">29</span>, <span class="at">value =</span> <span class="dv">150</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="st">"utility"</span>),</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Marvin Gardens"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">30</span>, <span class="at">value =</span> <span class="dv">280</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">24</span>, <span class="at">color =</span> <span class="st">"yellow"</span>),</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Go to Jail"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">31</span>, <span class="at">value =</span> <span class="cn">NA</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="cn">NA</span>),</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Pacific Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">32</span>, <span class="at">value =</span> <span class="dv">300</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">26</span>, <span class="at">color =</span> <span class="st">"green"</span>),</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>      <span class="st">"North Carolina Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">33</span>, <span class="at">value =</span> <span class="dv">300</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">26</span>, <span class="at">color =</span> <span class="st">"green"</span>),</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Community Chest"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">34</span>, <span class="at">value =</span> <span class="cn">NA</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="cn">NA</span>),</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Pennsylvania Avenue"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">35</span>, <span class="at">value =</span> <span class="dv">320</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">28</span>, <span class="at">color =</span> <span class="st">"green"</span>),</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Short Line Railroad"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">36</span>, <span class="at">value =</span> <span class="dv">200</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">25</span>, <span class="at">color =</span> <span class="st">"railroad"</span>),</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Chance"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">37</span>, <span class="at">value =</span> <span class="cn">NA</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="cn">NA</span>),</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Park Place"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">38</span>, <span class="at">value =</span> <span class="dv">350</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">35</span>, <span class="at">color =</span> <span class="st">"dark blue"</span>),</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Luxury Tax"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">39</span>, <span class="at">value =</span> <span class="dv">100</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">100</span>, <span class="at">color =</span> <span class="cn">NA</span>),</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Boardwalk"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">position =</span> <span class="dv">40</span>, <span class="at">value =</span> <span class="dv">400</span>,  <span class="at">owner =</span> <span class="cn">NA</span>, <span class="at">rent =</span> <span class="dv">50</span>, <span class="at">color =</span> <span class="st">"dark blue"</span>)</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  players <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">ID =</span> <span class="dv">1</span><span class="sc">:</span>n_players,</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    <span class="co">#start at "Go" (position 1)</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">Position =</span> <span class="fu">rep</span>(<span class="dv">1</span>, n_players),</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    <span class="co">#start with $1,500 per player</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">Cash =</span> <span class="fu">rep</span>(<span class="dv">1500</span>, n_players)</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">monopoly_board =</span> board, <span class="at">players =</span> players))</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>taxed_spaces <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Luxury Tax"</span>, <span class="st">"Income Tax"</span>)</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>special_properties <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">8</span>, <span class="dv">11</span>, <span class="dv">18</span>, <span class="dv">21</span>, <span class="dv">23</span>, <span class="dv">34</span>, <span class="dv">37</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="simulating-a-game" class="level2">
+<h2 class="anchored" data-anchor-id="simulating-a-game">Simulating a Game</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>game <span class="ot">&lt;-</span> <span class="cf">function</span>(n_players) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  game_data <span class="ot">&lt;-</span> <span class="fu">initialize_game</span>(n_players)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  monopoly_board <span class="ot">&lt;-</span> game_data<span class="sc">$</span>monopoly_board</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">#print(sapply(monopoly_board, names))</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  players <span class="ot">&lt;-</span> game_data<span class="sc">$</span>players</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">#purchasable &lt;- names(monopoly_board)[sapply(monopoly_board, function(x) !is.na(x[["color"]]))]</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">#print(monopoly_board)</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  rounds <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">#while there are still properties to purchase</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> (<span class="fu">sum</span>(<span class="fu">sapply</span>(monopoly_board, <span class="cf">function</span>(x) <span class="sc">!</span><span class="fu">is.na</span>(x<span class="sc">$</span>owner))) <span class="sc">&lt;</span> <span class="dv">28</span>) {</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    rounds <span class="ot">&lt;-</span> rounds <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">-- Round %d --</span><span class="sc">\n</span><span class="st">"</span>, rounds))</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (player <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_players) {</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>      <span class="co">#roll 2 dice</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>      dice_roll <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="dv">2</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>      position_update <span class="ot">&lt;-</span> players<span class="sc">$</span>Position[player] <span class="sc">+</span> dice_roll</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>      <span class="co">#if player passes go, they get $200</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (position_update <span class="sc">&gt;</span> <span class="fu">length</span>(monopoly_board)) {</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        position_update <span class="ot">&lt;-</span> position_update <span class="ot">&lt;-</span> (position_update <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">%%</span> <span class="fu">length</span>(monopoly_board) <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">#total cash of all players</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        total_cash <span class="ot">&lt;-</span> <span class="fu">sum</span>(players<span class="sc">$</span>Cash)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">#if banker has no more money, players do not collect anything when passing go</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (total_cash <span class="sc">&gt;=</span> <span class="dv">20580</span>) {players<span class="sc">$</span>Cash[player] <span class="ot">&lt;-</span> players<span class="sc">$</span>Cash[player]</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">#if banker has less than 200 in cash but more than zero, give player the balance</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> <span class="cf">if</span> (total_cash <span class="sc">&gt;</span> <span class="dv">20380</span> <span class="sc">&amp;&amp;</span> total_cash <span class="sc">&lt;</span> <span class="dv">20580</span>) {</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>          players<span class="sc">$</span>Cash[player] <span class="ot">&lt;-</span> players<span class="sc">$</span>Cash[player] <span class="sc">+</span> (<span class="dv">20580</span> <span class="sc">-</span> total_cash)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>          } <span class="cf">else</span> {</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>            players<span class="sc">$</span>Cash[player] <span class="ot">&lt;-</span> players<span class="sc">$</span>Cash[player] <span class="sc">+</span> <span class="dv">200</span>}</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>      <span class="co">#update the player's new position on the board</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>      players<span class="sc">$</span>Position[player] <span class="ot">&lt;-</span> position_update</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (position_update <span class="sc">%in%</span> special_properties) {</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        <span class="fu">print</span>(<span class="st">"Player does nothing"</span>)</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span>{</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>      <span class="co">#check action to take according to position on board</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>      landed_property <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (property_name <span class="cf">in</span> <span class="fu">names</span>(monopoly_board)) {</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>        property <span class="ot">&lt;-</span> monopoly_board[[property_name]]</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (property<span class="sc">$</span>position <span class="sc">==</span> position_update) {</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>          landed_property <span class="ot">&lt;-</span> property_name</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>          <span class="cf">break</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">is.null</span>(landed_property)) {</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"Error: Property not found at position"</span>, position_update, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>      <span class="fu">print</span>(landed_property)</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (landed_property <span class="sc">==</span> <span class="st">"Go to Jail"</span>) {</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>        jail_space <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">sapply</span>(monopoly_board, <span class="cf">function</span>(x) x<span class="sc">$</span>position <span class="sc">==</span> <span class="dv">11</span>))</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Player %d landed on Go to Jail and was sent to Jail"</span>, player))</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>        players<span class="sc">$</span>Position[player] <span class="ot">&lt;-</span> jail_space</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> <span class="cf">if</span> (landed_property <span class="sc">%in%</span> taxed_spaces) {</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>        <span class="co">#special space payments</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (landed_property <span class="sc">==</span> <span class="st">"Luxury Tax"</span>) {</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>          players<span class="sc">$</span>Cash[player] <span class="ot">&lt;-</span> players<span class="sc">$</span>Cash[player] <span class="sc">-</span> <span class="dv">100</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>          <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Player %d landed on Luxury Tax and paid $100</span><span class="sc">\n</span><span class="st">"</span>, player))</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> <span class="cf">if</span> (landed_property <span class="sc">==</span> <span class="st">"Income Tax"</span>) {</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>          players<span class="sc">$</span>Cash[player] <span class="ot">&lt;-</span> players<span class="sc">$</span>Cash[player] <span class="sc">-</span> <span class="dv">200</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>          <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Player %d landed on Income Tax and paid $200</span><span class="sc">\n</span><span class="st">"</span>, player))</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>        <span class="co">#check property on the new position</span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>        landed_property <span class="ot">&lt;-</span> position_update</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>        prop_value <span class="ot">&lt;-</span> monopoly_board[[landed_property]]<span class="sc">$</span>value</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>        prop_owner <span class="ot">&lt;-</span> monopoly_board[[landed_property]]<span class="sc">$</span>owner</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>        <span class="co">#if player lands on a property that they can buy, it is not owned and they can afford it, purchase it</span></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>          <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Player %d landed on Property for purchase</span><span class="sc">\n</span><span class="st">"</span>, player)) </span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>          <span class="fu">cat</span>(<span class="st">"Owner of Property"</span>, prop_owner, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>          <span class="co">#check property is not owned</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>          <span class="cf">if</span> (<span class="fu">is.na</span>(prop_owner)) {</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>            <span class="co">#check if can afford property</span></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>          <span class="cf">if</span> (players<span class="sc">$</span>Cash[player] <span class="sc">&gt;=</span> prop_value) {</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>            <span class="co">#pay for property</span></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>            players<span class="sc">$</span>Cash[player] <span class="ot">&lt;-</span></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>              players<span class="sc">$</span>Cash[player] <span class="sc">-</span> prop_value</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>            <span class="co">#update the property owner</span></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>            monopoly_board[[landed_property]]<span class="sc">$</span>owner <span class="ot">&lt;-</span> player</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>            <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Player %d bought %s for $%d</span><span class="sc">\n</span><span class="st">"</span>, player, landed_property,prop_value))</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>            } <span class="cf">else</span> {</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>            <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Player %d does not have enough cash to buy %s</span><span class="sc">\n</span><span class="st">"</span>, player, landed_property))</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>              }</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>          <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Player %d does nothing</span><span class="sc">\n</span><span class="st">"</span>, player))</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>        }}}</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>  <span class="co">#return(list(rounds = rounds, cash = players$Cash))</span></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rounds)</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="simulation-to-demonstrate-how-the-game-is-played" class="level2">
+<h2 class="anchored" data-anchor-id="simulation-to-demonstrate-how-the-game-is-played">1 simulation to demonstrate how the game is played</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>nsim <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>rounds_list <span class="ot">&lt;-</span> <span class="fu">numeric</span>(nsim)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>nsim) {</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  rounds_list[i] <span class="ot">&lt;-</span> <span class="fu">game</span>(<span class="at">n_players =</span> <span class="dv">2</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+-- Round 1 --
+[1] "St. Charles Place"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 bought 12 for $140
+[1] "Vermont Avenue"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 bought 9 for $100
+
+-- Round 2 --
+[1] "Kentucky Avenue"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 bought 22 for $220
+[1] "States Avenue"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 bought 14 for $140
+
+-- Round 3 --
+[1] "Pacific Avenue"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 bought 32 for $300
+[1] "Kentucky Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 4 --
+[1] "Short Line Railroad"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 bought 36 for $200
+[1] "Go to Jail"
+Player 2 landed on Go to Jail and was sent to Jail
+-- Round 5 --
+[1] "Mediterranean Avenue"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 bought 2 for $60
+[1] "Electric Company"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 bought 13 for $150
+
+-- Round 6 --
+[1] "Player does nothing"
+[1] "Indiana Avenue"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 bought 24 for $220
+
+-- Round 7 --
+[1] "New York Avenue"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 bought 20 for $200
+[1] "Pacific Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 8 --
+[1] "Go to Jail"
+Player 1 landed on Go to Jail and was sent to Jail[1] "Player does nothing"
+
+-- Round 9 --
+[1] "Player does nothing"
+[1] "St. Charles Place"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 10 --
+[1] "Player does nothing"
+[1] "Tennessee Avenue"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 bought 19 for $180
+
+-- Round 11 --
+[1] "Go to Jail"
+Player 1 landed on Go to Jail and was sent to Jail[1] "Player does nothing"
+
+-- Round 12 --
+[1] "Tennessee Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Atlantic Avenue"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 bought 27 for $260
+
+-- Round 13 --
+[1] "Illinois Avenue"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 bought 25 for $240
+[1] "Pennsylvania Avenue"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 bought 35 for $320
+
+-- Round 14 --
+[1] "North Carolina Avenue"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 bought 33 for $300
+[1] "Mediterranean Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 15 --
+[1] "Pennsylvania Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Connecticut Avenue"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 bought 10 for $120
+
+-- Round 16 --
+[1] "Mediterranean Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 17 --
+[1] "Electric Company"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Indiana Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 18 --
+[1] "Player does nothing"
+[1] "Player does nothing"
+
+-- Round 19 --
+[1] "Atlantic Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Boardwalk"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 bought 40 for $400
+
+-- Round 20 --
+[1] "North Carolina Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Vermont Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 21 --
+[1] "Mediterranean Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Virginia Avenue"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 bought 15 for $160
+
+-- Round 22 --
+[1] "Player does nothing"
+[1] "Player does nothing"
+
+-- Round 23 --
+[1] "Pennsylvania Railroad"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 bought 16 for $200
+[1] "Water Works"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 does not have enough cash to buy 29
+
+-- Round 24 --
+[1] "Indiana Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 25 --
+[1] "Water Works"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 bought 29 for $150
+[1] "Income Tax"
+Player 2 landed on Income Tax and paid $200
+
+-- Round 26 --
+[1] "Park Place"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 does not have enough cash to buy 38
+[1] "States Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 27 --
+[1] "Player does nothing"
+[1] "Player does nothing"
+
+-- Round 28 --
+[1] "Connecticut Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Marvin Gardens"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 does not have enough cash to buy 30
+
+-- Round 29 --
+[1] "St. Charles Place"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "North Carolina Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 30 --
+[1] "Indiana Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Boardwalk"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 31 --
+[1] "Marvin Gardens"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 bought 30 for $280
+[1] "Connecticut Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 32 --
+[1] "Park Place"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 does not have enough cash to buy 38
+[1] "St. James Place"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 bought 17 for $180
+
+-- Round 33 --
+[1] "Player does nothing"
+[1] "Player does nothing"
+
+-- Round 34 --
+[1] "Vermont Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Marvin Gardens"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 35 --
+[1] "New York Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Short Line Railroad"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 36 --
+[1] "B&amp;O Railroad"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 bought 26 for $200
+[1] "Player does nothing"
+
+-- Round 37 --
+[1] "North Carolina Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 38 --
+[1] "Luxury Tax"
+Player 1 landed on Luxury Tax and paid $100
+[1] "St. Charles Place"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 39 --
+[1] "Baltic Avenue"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 bought 4 for $60
+[1] "Player does nothing"
+
+-- Round 40 --
+[1] "Electric Company"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Go to Jail"
+Player 2 landed on Go to Jail and was sent to Jail
+-- Round 41 --
+[1] "Player does nothing"
+[1] "New York Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 42 --
+[1] "Atlantic Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Indiana Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 43 --
+[1] "Go to Jail"
+Player 1 landed on Go to Jail and was sent to Jail[1] "North Carolina Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 44 --
+[1] "Player does nothing"
+[1] "Park Place"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 does not have enough cash to buy 38
+
+-- Round 45 --
+[1] "Ventnor Avenue"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 does not have enough cash to buy 28
+[1] "Player does nothing"
+
+-- Round 46 --
+[1] "Pennsylvania Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "States Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 47 --
+[1] "Baltic Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Tennessee Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 48 --
+[1] "Player does nothing"
+[1] "B&amp;O Railroad"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 49 --
+[1] "St. James Place"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Go to Jail"
+Player 2 landed on Go to Jail and was sent to Jail
+-- Round 50 --
+[1] "Atlantic Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "States Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 51 --
+[1] "North Carolina Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 52 --
+[1] "Mediterranean Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Marvin Gardens"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 53 --
+[1] "Oriental Avenue"
+Player 1 landed on Property for purchase
+Owner of Property NA 
+Player 1 bought 7 for $100
+[1] "Short Line Railroad"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 54 --
+[1] "States Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 55 --
+[1] "Illinois Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 56 --
+[1] "Pennsylvania Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Reading Railroad"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 bought 6 for $200
+
+-- Round 57 --
+[1] "Mediterranean Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "States Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 58 --
+[1] "Vermont Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "New York Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 59 --
+[1] "Tennessee Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 60 --
+[1] "Indiana Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Ventnor Avenue"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 bought 28 for $260
+
+-- Round 61 --
+[1] "Atlantic Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 62 --
+[1] "Short Line Railroad"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Baltic Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 63 --
+[1] "Player does nothing"
+[1] "States Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 64 --
+[1] "Reading Railroad"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 65 --
+[1] "St. Charles Place"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Water Works"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 66 --
+[1] "Kentucky Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Luxury Tax"
+Player 2 landed on Luxury Tax and paid $100
+
+-- Round 67 --
+[1] "Go to Jail"
+Player 1 landed on Go to Jail and was sent to Jail[1] "Vermont Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 68 --
+[1] "St. James Place"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 69 --
+[1] "Indiana Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Marvin Gardens"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 70 --
+[1] "Go to Jail"
+Player 1 landed on Go to Jail and was sent to Jail[1] "Player does nothing"
+
+-- Round 71 --
+[1] "New York Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Luxury Tax"
+Player 2 landed on Luxury Tax and paid $100
+
+-- Round 72 --
+[1] "Atlantic Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Baltic Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 73 --
+[1] "Pennsylvania Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 74 --
+[1] "Player does nothing"
+[1] "Tennessee Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 75 --
+[1] "St. Charles Place"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 76 --
+[1] "Pennsylvania Railroad"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Water Works"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 77 --
+[1] "Indiana Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 78 --
+[1] "North Carolina Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Reading Railroad"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 79 --
+[1] "Luxury Tax"
+Player 1 landed on Luxury Tax and paid $100
+[1] "States Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 80 --
+[1] "Oriental Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Tennessee Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 81 --
+[1] "Virginia Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Kentucky Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 82 --
+[1] "New York Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Ventnor Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 83 --
+[1] "Ventnor Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "North Carolina Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 84 --
+[1] "Short Line Railroad"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 85 --
+[1] "Player does nothing"
+[1] "Baltic Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 86 --
+[1] "Connecticut Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "St. Charles Place"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 87 --
+[1] "Tennessee Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "St. James Place"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 88 --
+[1] "B&amp;O Railroad"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Atlantic Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 89 --
+[1] "Ventnor Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Pennsylvania Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 90 --
+[1] "Pennsylvania Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 91 --
+[1] "Baltic Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Connecticut Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 92 --
+[1] "Connecticut Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "St. James Place"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 93 --
+[1] "Tennessee Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Atlantic Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 94 --
+[1] "Atlantic Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Pennsylvania Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 95 --
+[1] "Marvin Gardens"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 96 --
+[1] "Short Line Railroad"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Oriental Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 97 --
+[1] "Luxury Tax"
+Player 1 landed on Luxury Tax and paid $100
+[1] "Player does nothing"
+
+-- Round 98 --
+[1] "Baltic Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "B&amp;O Railroad"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 99 --
+[1] "Vermont Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "North Carolina Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 100 --
+[1] "St. James Place"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Luxury Tax"
+Player 2 landed on Luxury Tax and paid $100
+
+-- Round 101 --
+[1] "New York Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Baltic Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 102 --
+[1] "Marvin Gardens"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 103 --
+[1] "Player does nothing"
+[1] "Player does nothing"
+
+-- Round 104 --
+[1] "Oriental Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "New York Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 105 --
+[1] "Electric Company"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Ventnor Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 106 --
+[1] "Virginia Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Player does nothing"
+
+-- Round 107 --
+[1] "Player does nothing"
+[1] "Player does nothing"
+
+-- Round 108 --
+[1] "North Carolina Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Vermont Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 109 --
+[1] "Mediterranean Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Virginia Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 110 --
+[1] "Player does nothing"
+[1] "New York Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 111 --
+[1] "Player does nothing"
+[1] "Pacific Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 112 --
+[1] "B&amp;O Railroad"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Boardwalk"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 113 --
+[1] "Water Works"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Oriental Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 114 --
+[1] "North Carolina Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Tennessee Avenue"
+Player 2 landed on Property for purchase
+Owner of Property 2 
+Player 2 does nothing
+
+-- Round 115 --
+[1] "Mediterranean Avenue"
+Player 1 landed on Property for purchase
+Owner of Property 1 
+Player 1 does nothing
+[1] "Water Works"
+Player 2 landed on Property for purchase
+Owner of Property 1 
+Player 2 does nothing
+
+-- Round 116 --
+[1] "Reading Railroad"
+Player 1 landed on Property for purchase
+Owner of Property 2 
+Player 1 does nothing
+[1] "Park Place"
+Player 2 landed on Property for purchase
+Owner of Property NA 
+Player 2 bought 38 for $350</code></pre>
+</div>
+</div>
+</section>
+<section id="redefining-how-game-is-played-in-preparation-for-multiple-simulations-i.e.-without-print-statements" class="level2">
+<h2 class="anchored" data-anchor-id="redefining-how-game-is-played-in-preparation-for-multiple-simulations-i.e.-without-print-statements">Redefining how game is played in preparation for multiple simulations (i.e.&nbsp;without print statements)</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>game <span class="ot">&lt;-</span> <span class="cf">function</span>(n_players) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  game_data <span class="ot">&lt;-</span> <span class="fu">initialize_game</span>(n_players)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  monopoly_board <span class="ot">&lt;-</span> game_data<span class="sc">$</span>monopoly_board</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  players <span class="ot">&lt;-</span> game_data<span class="sc">$</span>players</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">#initialize rounds and number of properties owned by each player</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  rounds <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  properties_collected <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_players)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">#keep track of player 1's game</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  player_1_most_properties_count <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  player_1_most_cash_count <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> (<span class="fu">sum</span>(<span class="fu">sapply</span>(monopoly_board, <span class="cf">function</span>(x) <span class="sc">!</span><span class="fu">is.na</span>(x<span class="sc">$</span>owner))) <span class="sc">&lt;</span> <span class="dv">28</span>) {</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">#print(players$Cash)</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    rounds <span class="ot">&lt;-</span> rounds <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">#cat(sprintf("\n-- Round %d --\n", rounds))</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (player <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_players) {</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>      <span class="co">#roll 2 dice</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>      dice_roll <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="dv">2</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>      position_update <span class="ot">&lt;-</span> players<span class="sc">$</span>Position[player] <span class="sc">+</span> dice_roll</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>      <span class="co">#if player passes go, they get $200</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (position_update <span class="sc">&gt;</span> <span class="fu">length</span>(monopoly_board)) {</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        position_update <span class="ot">&lt;-</span> position_update <span class="ot">&lt;-</span> (position_update <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">%%</span> <span class="fu">length</span>(monopoly_board) <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">#total cash of all players</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        total_cash <span class="ot">&lt;-</span> <span class="fu">sum</span>(players<span class="sc">$</span>Cash)</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">#if banker has no more money, players do not collect anything when passing go</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (total_cash <span class="sc">&gt;=</span> <span class="dv">20580</span>) {players<span class="sc">$</span>Cash[player] <span class="ot">&lt;-</span> players<span class="sc">$</span>Cash[player]</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>        <span class="co">#if banker has less than 200 in cash but more than zero, give player the balance</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> <span class="cf">if</span> (total_cash <span class="sc">&gt;</span> <span class="dv">20380</span> <span class="sc">&amp;&amp;</span> total_cash <span class="sc">&lt;</span> <span class="dv">20580</span>) {</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>          players<span class="sc">$</span>Cash[player] <span class="ot">&lt;-</span> players<span class="sc">$</span>Cash[player] <span class="sc">+</span> (<span class="dv">20580</span> <span class="sc">-</span> total_cash)</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>          } <span class="cf">else</span> {</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>            players<span class="sc">$</span>Cash[player] <span class="ot">&lt;-</span> players<span class="sc">$</span>Cash[player] <span class="sc">+</span> <span class="dv">200</span>}</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>      <span class="co">#update the player's new position on the board</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>      players<span class="sc">$</span>Position[player] <span class="ot">&lt;-</span> position_update</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (position_update <span class="sc">%in%</span> special_properties) {</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">next</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span>{</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>      <span class="co">#check action to take according to position on board</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>      landed_property <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (property_name <span class="cf">in</span> <span class="fu">names</span>(monopoly_board)) {</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>        property <span class="ot">&lt;-</span> monopoly_board[[property_name]]</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (property<span class="sc">$</span>position <span class="sc">==</span> position_update) {</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>          landed_property <span class="ot">&lt;-</span> property_name</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>          <span class="cf">break</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (landed_property <span class="sc">==</span> <span class="st">"Go to Jail"</span>) {</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>        jail_space <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">sapply</span>(monopoly_board, <span class="cf">function</span>(x) x<span class="sc">$</span>position <span class="sc">==</span> <span class="dv">11</span>))</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>        players<span class="sc">$</span>Position[player] <span class="ot">&lt;-</span> jail_space</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> <span class="cf">if</span> (landed_property <span class="sc">%in%</span> taxed_spaces) {</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>        <span class="co">#special space payments</span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (landed_property <span class="sc">==</span> <span class="st">"Luxury Tax"</span>) {</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>          players<span class="sc">$</span>Cash[player] <span class="ot">&lt;-</span> players<span class="sc">$</span>Cash[player] <span class="sc">-</span> <span class="dv">100</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> <span class="cf">if</span> (landed_property <span class="sc">==</span> <span class="st">"Income Tax"</span>) {</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>          players<span class="sc">$</span>Cash[player] <span class="ot">&lt;-</span> players<span class="sc">$</span>Cash[player] <span class="sc">-</span> <span class="dv">200</span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>          <span class="co">#cat(sprintf("Player %d landed on Income Tax and paid $200\n", player))</span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>        <span class="co">#check property on the new position</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>        landed_property <span class="ot">&lt;-</span> position_update</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>        prop_value <span class="ot">&lt;-</span> monopoly_board[[landed_property]]<span class="sc">$</span>value</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>        prop_owner <span class="ot">&lt;-</span> monopoly_board[[landed_property]]<span class="sc">$</span>owner</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>        <span class="co">#if player lands on a property that they can buy, it is not owned and they can afford it, purchase it</span></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>          <span class="co">#check property is not owned</span></span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>          <span class="cf">if</span> (<span class="fu">is.na</span>(prop_owner)) {</span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>            <span class="co">#check if can afford property</span></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>          <span class="cf">if</span> (players<span class="sc">$</span>Cash[player] <span class="sc">&gt;=</span> prop_value) {</span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>            <span class="co">#pay for property</span></span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>            players<span class="sc">$</span>Cash[player] <span class="ot">&lt;-</span></span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>              players<span class="sc">$</span>Cash[player] <span class="sc">-</span> prop_value</span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>            <span class="co">#update the property owner</span></span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>            monopoly_board[[landed_property]]<span class="sc">$</span>owner <span class="ot">&lt;-</span> player</span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>            properties_collected[player] <span class="ot">&lt;-</span> properties_collected[player] <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>            <span class="co">#cat(sprintf("Player %d bought %s for $%d\n", player, landed_property,prop_value))</span></span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>            } </span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>        } }}}}</span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a>      <span class="co">#check how player 1 ended the game</span></span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>      player_1_properties <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">sapply</span>(monopoly_board, <span class="cf">function</span>(x) <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.na</span>(x<span class="sc">$</span>owner) <span class="sc">&amp;&amp;</span> x<span class="sc">$</span>owner <span class="sc">==</span> <span class="dv">1</span>) <span class="dv">1</span> <span class="cf">else</span> <span class="dv">0</span>))</span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>  player_1_cash <span class="ot">&lt;-</span> players<span class="sc">$</span>Cash[<span class="dv">1</span>]</span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a>  most_properties <span class="ot">&lt;-</span> <span class="fu">max</span>(properties_collected)</span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>  most_cash <span class="ot">&lt;-</span> <span class="fu">max</span>(players<span class="sc">$</span>Cash)</span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (player_1_properties <span class="sc">==</span> most_properties) {</span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>    player_1_most_properties_count <span class="ot">&lt;-</span> player_1_most_properties_count <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (player_1_cash <span class="sc">==</span> most_cash) {</span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>    player_1_most_cash_count <span class="ot">&lt;-</span> player_1_most_cash_count <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">rounds =</span> rounds, <span class="at">properties =</span> properties_collected, <span class="at">one_won_properties =</span> player_1_most_properties_count,</span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a>    <span class="at">one_won_cash =</span> player_1_most_cash_count))</span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="game-simulation-with-2-players" class="level2">
+<h2 class="anchored" data-anchor-id="game-simulation-with-2-players">Game simulation with 2 players</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>nsim <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>rounds_list <span class="ot">&lt;-</span> <span class="fu">numeric</span>(nsim)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>most_properties_collected <span class="ot">&lt;-</span> <span class="fu">numeric</span>(nsim)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>won_one_cash <span class="ot">&lt;-</span> <span class="fu">numeric</span>(nsim)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>won_one_properties <span class="ot">&lt;-</span> <span class="fu">numeric</span>(nsim)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>nsim) {</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> <span class="fu">game</span>(<span class="at">n_players =</span> <span class="dv">2</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  rounds_list[i] <span class="ot">&lt;-</span> result<span class="sc">$</span>rounds</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  most_properties_collected[i] <span class="ot">&lt;-</span> <span class="fu">max</span>(result<span class="sc">$</span>properties)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  won_one_cash[i] <span class="ot">&lt;-</span> result<span class="sc">$</span>one_won_cash</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  won_one_properties[i] <span class="ot">&lt;-</span> result<span class="sc">$</span>one_won_properties</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>mean_rounds_result <span class="ot">&lt;-</span> <span class="fu">mean</span>(rounds_list)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>mean_most_properties <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">mean</span>(most_properties_collected),<span class="dv">0</span>)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Mean number of rounds across %d simulations: %.2f</span><span class="sc">\n</span><span class="st">"</span>, nsim, mean_rounds_result))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Mean number of rounds across 10000 simulations: 96.06</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Average maximum properties collected by a player: "</span>, mean_most_properties,<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Average maximum properties collected by a player:  15 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Player 1 had the most properties at the end of the game this proportion of times:"</span>, <span class="fu">sum</span>(won_one_properties)<span class="sc">/</span><span class="fu">length</span>(won_one_properties))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Player 1 had the most properties at the end of the game this proportion of times: 0.6489</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Player 1 had the most properties at the end of the game this proportion of times:"</span>, <span class="fu">sum</span>(won_one_cash)<span class="sc">/</span><span class="fu">length</span>(won_one_cash))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Player 1 had the most properties at the end of the game this proportion of times: 0.4951</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(rounds_list,</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">main =</span> <span class="st">"Rounds Per Game"</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">xlab =</span> <span class="st">"Number of Rounds"</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">"Frequency"</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">col =</span> <span class="st">"lightblue"</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">border =</span> <span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Monopoly_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(most_properties_collected, </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">main =</span> <span class="st">"Maximum Properties Collected by a Player"</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">xlab =</span> <span class="st">"Properties collected"</span>, </span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">"Frequency"</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">"lightblue"</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">border =</span> <span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Monopoly_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fu">sum</span>(won_one_properties)<span class="sc">/</span><span class="fu">length</span>(won_one_properties), <span class="fu">sum</span>(won_one_cash)<span class="sc">/</span><span class="fu">length</span>(won_one_cash)),</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">names.arg =</span> <span class="fu">c</span>(<span class="st">"Most Properties"</span>, <span class="st">"Most Cash"</span>),</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="st">"lightblue"</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Proportion of Player 1's Success"</span>,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Proportion"</span>,</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Condition"</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Monopoly_files/figure-html/unnamed-chunk-6-3.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="game-simulation-with-varying-number-of-players" class="level2">
+<h2 class="anchored" data-anchor-id="game-simulation-with-varying-number-of-players">Game simulation with varying number of players</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>nsim <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>n_players_values <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">n_players =</span> <span class="fu">integer</span>(<span class="dv">0</span>), </span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">mean_rounds =</span> <span class="fu">numeric</span>(<span class="dv">0</span>), </span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">mean_properties =</span> <span class="fu">numeric</span>(<span class="dv">0</span>))</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (n_players <span class="cf">in</span> n_players_values) {</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  rounds_list <span class="ot">&lt;-</span> <span class="fu">numeric</span>(nsim)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  most_properties_collected <span class="ot">&lt;-</span> <span class="fu">numeric</span>(nsim)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  won_one_cash <span class="ot">&lt;-</span> <span class="fu">numeric</span>(nsim)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  won_one_properties <span class="ot">&lt;-</span> <span class="fu">numeric</span>(nsim)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Run the simulations for each number of players</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>nsim) {</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    result <span class="ot">&lt;-</span> <span class="fu">game</span>(<span class="at">n_players =</span> n_players)</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    rounds_list[i] <span class="ot">&lt;-</span> result<span class="sc">$</span>rounds</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    most_properties_collected[i] <span class="ot">&lt;-</span> <span class="fu">max</span>(result<span class="sc">$</span>properties)</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    won_one_cash[i] <span class="ot">&lt;-</span> result<span class="sc">$</span>one_won_cash</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    won_one_properties[i] <span class="ot">&lt;-</span> result<span class="sc">$</span>one_won_properties</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>  mean_rounds_result <span class="ot">&lt;-</span> <span class="fu">mean</span>(rounds_list)</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>  mean_most_properties <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">mean</span>(most_properties_collected), <span class="dv">0</span>)</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>  mean_won_cash <span class="ot">&lt;-</span> <span class="fu">mean</span>(won_one_cash)</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>  mean_won_properties <span class="ot">&lt;-</span> <span class="fu">mean</span>(won_one_properties)</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>  results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(results, <span class="fu">data.frame</span>(</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_players =</span> n_players,</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_rounds =</span> mean_rounds_result,</span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_properties =</span> mean_most_properties,</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>    won_cash <span class="ot">&lt;-</span> mean_won_cash,</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>    won_properties <span class="ot">&lt;-</span> mean_won_properties</span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(results, <span class="fu">aes</span>(<span class="at">x =</span> n_players, <span class="at">y =</span> mean_rounds)) <span class="sc">+</span></span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Average Number of Rounds by Number of Players"</span>,</span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Number of Players"</span>,</span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Average Number of Rounds"</span>) <span class="sc">+</span></span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Monopoly_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(results, <span class="fu">aes</span>(<span class="at">x =</span> n_players, <span class="at">y =</span> mean_properties)) <span class="sc">+</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Average Maximum Properties Collected by Player"</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Number of Players"</span>,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Average Maximum Properties Collected"</span>) <span class="sc">+</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Monopoly_files/figure-html/unnamed-chunk-7-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(results, <span class="fu">aes</span>(<span class="at">x =</span> n_players, <span class="at">y =</span> won_properties....mean_won_properties)) <span class="sc">+</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Average Number of Times Player 1 Ends with Most Properties"</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Number of Players"</span>, <span class="at">y =</span> <span class="st">"Proportion"</span>) <span class="sc">+</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Monopoly_files/figure-html/unnamed-chunk-7-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(results, <span class="fu">aes</span>(<span class="at">x =</span> n_players, <span class="at">y =</span> won_cash....mean_won_cash)) <span class="sc">+</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Average Number of Times Player 1 Ends with Most Cash"</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Number of Players"</span>, <span class="at">y =</span> <span class="st">"Proportion"</span>) <span class="sc">+</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Monopoly_files/figure-html/unnamed-chunk-7-4.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
